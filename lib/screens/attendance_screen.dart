@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import '../config/api_constants.dart';
 import '../config/theme.dart';
 import '../providers/attendance_provider.dart';
+import '../providers/history_provider.dart';
 import '../widgets/gps_switch_card.dart';
 
 class AttendanceScreen extends StatelessWidget {
@@ -40,14 +41,14 @@ class AttendanceScreen extends StatelessWidget {
             const SizedBox(height: 6),
             TextField(
               controller: latController,
-              decoration: const InputDecoration(hintText: '-7.1602651'),
+              decoration: const InputDecoration(hintText: '-7.157700'),
             ),
             const SizedBox(height: 12),
             Text('Longitude', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             TextField(
               controller: lngController,
-              decoration: const InputDecoration(hintText: '112.6330005'),
+              decoration: const InputDecoration(hintText: '112.642500'),
             ),
             const SizedBox(height: 14),
             OutlinedButton.icon(
@@ -340,6 +341,10 @@ class AttendanceScreen extends StatelessWidget {
                   : () async {
                       final success = await attendance.submitAttendance();
                       if (context.mounted) {
+                        if (success) {
+                          // Immediately reload real history from server to sync data everywhere
+                          context.read<HistoryProvider>().loadAllData();
+                        }
                         showDialog(
                           context: context,
                           builder: (ctx) => AlertDialog(
@@ -416,7 +421,9 @@ class AttendanceScreen extends StatelessWidget {
                       }
                     },
               style: ElevatedButton.styleFrom(
-                backgroundColor: attendance.hasClockedOut ? AppTheme.success : AppTheme.primary,
+                backgroundColor: attendance.hasClockedOut
+                    ? AppTheme.success
+                    : (attendance.hasClockedIn ? const Color(0xFFDC2626) : AppTheme.primary),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               ),
               child: attendance.isSubmitting
@@ -428,12 +435,17 @@ class AttendanceScreen extends StatelessWidget {
                   : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.fingerprint_rounded, size: 24),
+                        Icon(
+                          attendance.hasClockedOut
+                              ? Icons.check_circle_rounded
+                              : (attendance.hasClockedIn ? Icons.logout_rounded : Icons.login_rounded),
+                          size: 24,
+                        ),
                         const SizedBox(width: 10),
                         Text(
                           !attendance.hasClockedIn
                               ? 'Absen Masuk Sekarang'
-                              : (!attendance.hasClockedOut ? 'Absen Pulang Sekarang' : 'Sudah Absen Hari Ini'),
+                              : (!attendance.hasClockedOut ? 'Absen Pulang Sekarang' : 'Sudah Absen Masuk & Pulang'),
                           style: GoogleFonts.inter(
                             fontSize: 16,
                             fontWeight: FontWeight.w700,

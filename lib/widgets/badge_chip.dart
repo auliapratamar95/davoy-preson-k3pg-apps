@@ -51,6 +51,15 @@ class BadgeChip extends StatelessWidget {
     );
   }
 
+  factory BadgeChip.neutral(String label, {IconData? icon}) {
+    return BadgeChip(
+      label: label,
+      backgroundColor: const Color(0xFFF1F5F9),
+      textColor: const Color(0xFF64748B),
+      icon: icon,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(

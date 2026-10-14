@@ -2,23 +2,24 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
+import '../models/history_model.dart';
 import '../services/api_service.dart';
 
 class AttendanceProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   final ImagePicker _picker = ImagePicker();
 
-  // Static GPS Coordinates for Kantor Pusat K3PG
-  static const String kDefaultStaticLatitude = '-7.1602651';
-  static const String kDefaultStaticLongitude = '112.6330005';
+  // Static GPS Coordinates for Kantor Pusat K3PG (Valid coordinates tested against real PresOn geofence)
+  static const String kDefaultStaticLatitude = '-7.157700';
+  static const String kDefaultStaticLongitude = '112.642500';
   static const String kStaticLocationName = 'Kantor Pusat K3PG';
 
   bool _isStaticGps = true; // Aktif secara default untuk Kantor Pusat K3PG
   String _staticLatitude = kDefaultStaticLatitude;
   String _staticLongitude = kDefaultStaticLongitude;
 
-  String _latitude = '-7.161042';
-  String _longitude = '112.653421';
+  String _latitude = '-7.157700';
+  String _longitude = '112.642500';
   bool _isLoadingLocation = false;
   String? _locationError;
 
@@ -29,10 +30,10 @@ class AttendanceProvider extends ChangeNotifier {
   bool _isSubmitting = false;
   String? _lastSubmitMessage;
 
-  // Today's attendance state
-  String _todayTimeIn = '07:26:39';
+  // Today's attendance state (dynamically synced from server history)
+  String _todayTimeIn = 'Belum absen';
   String _todayTimeOut = 'Belum absen';
-  bool _hasClockedIn = true;
+  bool _hasClockedIn = false;
   bool _hasClockedOut = false;
 
   // Static GPS getters
@@ -91,6 +92,34 @@ class AttendanceProvider extends ChangeNotifier {
     _staticLatitude = kDefaultStaticLatitude;
     _staticLongitude = kDefaultStaticLongitude;
     notifyListeners();
+  }
+
+  /// Sync today's clock-in / clock-out status from real server history
+  void syncWithHistory(List<HistoryModel> history) {
+    if (history.isEmpty) return;
+    final latest = history.first;
+    final now = DateTime.now();
+    final dayStr = now.day.toString();
+
+    // Check if latest history item matches today
+    if (latest.date.contains(dayStr)) {
+      if (latest.timeIn.isNotEmpty && latest.timeIn != '00:00:00' && latest.timeIn != '-') {
+        _hasClockedIn = true;
+        _todayTimeIn = latest.timeIn;
+      } else {
+        _hasClockedIn = false;
+        _todayTimeIn = 'Belum absen';
+      }
+
+      if (latest.timeOut.isNotEmpty && latest.timeOut != '00:00:00' && latest.timeOut != '-') {
+        _hasClockedOut = true;
+        _todayTimeOut = latest.timeOut;
+      } else {
+        _hasClockedOut = false;
+        _todayTimeOut = 'Belum absen';
+      }
+      notifyListeners();
+    }
   }
 
   void setShift(String id) {

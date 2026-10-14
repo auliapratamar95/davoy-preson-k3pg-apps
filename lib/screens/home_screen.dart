@@ -36,6 +36,13 @@ class HomeScreen extends StatelessWidget {
     final now = DateTime.now();
     final dateStr = DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(now);
 
+    // Auto-sync attendance provider with real history from server
+    if (history.historyList.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        attendance.syncWithHistory(history.historyList);
+      });
+    }
+
     final months = [
       {'val': '01', 'name': 'Januari'},
       {'val': '02', 'name': 'Februari'},
@@ -55,6 +62,7 @@ class HomeScreen extends StatelessWidget {
       onRefresh: () async {
         await history.loadAllData();
         await attendance.refreshLocation();
+        attendance.syncWithHistory(history.historyList);
       },
       color: AppTheme.primary,
       child: SingleChildScrollView(
@@ -182,60 +190,69 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // Today's Status Card
+            // Today's Status Cards (Absen Masuk & Absen Pulang)
             Row(
               children: [
                 Expanded(
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: const Color(0xFFE2E8F0)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withAlpha(8),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  child: InkWell(
+                    onTap: () => onNavigateTab(2),
+                    borderRadius: BorderRadius.circular(18),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: attendance.hasClockedIn ? const Color(0xFFE2E8F0) : AppTheme.primary.withAlpha(60),
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFD1FAE5),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.login_rounded, size: 16, color: Color(0xFF059669)),
-                            ),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Absen Masuk',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF64748B),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          attendance.todayTimeIn,
-                          style: GoogleFonts.outfit(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: const Color(0xFF0F172A),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withAlpha(8),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        BadgeChip.danger('Telat'),
-                      ],
+                        ],
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(6),
+                                decoration: BoxDecoration(
+                                  color: const Color(0xFFD1FAE5),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: const Icon(Icons.login_rounded, size: 16, color: Color(0xFF059669)),
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Absen Masuk',
+                                style: GoogleFonts.inter(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                  color: const Color(0xFF64748B),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            attendance.todayTimeIn,
+                            style: GoogleFonts.outfit(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0F172A),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          if (attendance.hasClockedIn)
+                            BadgeChip.success('Hadir')
+                          else
+                            BadgeChip.warning('Tap untuk Absen'),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -294,10 +311,12 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          if (!attendance.hasClockedOut)
+                          if (attendance.hasClockedOut)
+                            BadgeChip.success('Selesai')
+                          else if (attendance.hasClockedIn)
                             BadgeChip.warning('Tap untuk Absen')
                           else
-                            BadgeChip.success('Selesai'),
+                            BadgeChip.neutral('Menunggu Masuk'),
                         ],
                       ),
                     ),

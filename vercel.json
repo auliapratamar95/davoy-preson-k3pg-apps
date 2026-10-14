@@ -18,6 +18,14 @@
   ],
   "rewrites": [
     {
+      "source": "/sw-proses",
+      "destination": "/api/sw-proses"
+    },
+    {
+      "source": "/sw-content/:path*",
+      "destination": "https://preson.k3pg.co.id/sw-content/:path*"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

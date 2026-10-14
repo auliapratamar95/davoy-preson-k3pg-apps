@@ -17,7 +17,22 @@ class ApiService {
   String? customProxyUrl;
   bool isLiveConnected = false;
 
-  String get _targetBaseUrl => customProxyUrl ?? ApiConstants.baseUrl;
+  String get _targetBaseUrl {
+    if (customProxyUrl != null && customProxyUrl!.trim().isNotEmpty) {
+      return customProxyUrl!.trim();
+    }
+    if (kIsWeb) {
+      final host = Uri.base.host.toLowerCase();
+      // On deployed web environments (Vercel, custom domain) use current origin with rewrites
+      if (host != 'localhost' && host != '127.0.0.1' && host.isNotEmpty) {
+        return Uri.base.origin;
+      }
+      // On local web dev, default to local CORS proxy
+      return 'http://localhost:8080';
+    }
+    // Native mobile / desktop
+    return ApiConstants.baseUrl;
+  }
 
   Map<String, String> _getHeaders({bool isFormData = true}) {
     final headers = <String, String>{
@@ -172,32 +187,36 @@ class ApiService {
       _updateCookies(response);
 
       final text = response.body.trim();
+      debugPrint('[ApiService] submitAttendance response: $text (HTTP ${response.statusCode})');
+
       if (text.contains('/')) {
         final parts = text.split('/');
-        final status = parts[0].trim();
+        final status = parts[0].trim().toLowerCase();
         final message = parts.sublist(1).join('/').trim();
         return {
           'success': status == 'success',
           'message': message,
+          'isLive': true,
         };
-      } else if (text == 'success' || response.statusCode == 200) {
+      } else if (text.toLowerCase() == 'success') {
         return {
           'success': true,
           'message': 'Presensi berhasil dicatat pada ${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
+          'isLive': true,
         };
       } else {
         return {
           'success': false,
-          'message': text.isNotEmpty ? text : 'Gagal mengirim absensi',
+          'message': text.isNotEmpty ? text : 'Gagal mengirim absensi ke server',
+          'isLive': true,
         };
       }
     } catch (e) {
       debugPrint('[ApiService] submitAttendance error: $e');
-      // Graceful offline mock response
       return {
-        'success': true,
-        'message': 'Presensi berhasil dicatat (Mode Simulasi)',
-        'isMock': true,
+        'success': false,
+        'message': 'Gagal terhubung ke API PresOn: $e\n\nJika menggunakan Flutter Web di localhost, pastikan CORS Proxy aktif (python cors_proxy.py).',
+        'isLive': false,
       };
     }
   }
