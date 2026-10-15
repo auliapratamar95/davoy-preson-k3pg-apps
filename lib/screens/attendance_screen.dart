@@ -28,15 +28,80 @@ class AttendanceScreen extends StatelessWidget {
             ),
           ],
         ),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Koordinat ini otomatis disisipkan ke payload query "latitude" saat Absen Masuk maupun Absen Pulang.',
-              style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Koordinat ini otomatis disisipkan ke payload query "latitude" saat Absen Masuk maupun Absen Pulang.',
+                style: GoogleFonts.inter(fontSize: 13, color: const Color(0xFF64748B)),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Pilih Titik Spot (Radius <100m Geofence):',
+                style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 6),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                border: Border.all(color: const Color(0xFFCBD5E1)),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<int>(
+                  isExpanded: true,
+                  value: attendance.selectedCoordinateIndex < AttendanceProvider.kGeofenceCoordinates.length
+                      ? attendance.selectedCoordinateIndex
+                      : 0,
+                  items: List.generate(
+                    AttendanceProvider.kGeofenceCoordinates.length,
+                    (i) {
+                      final spot = AttendanceProvider.kGeofenceCoordinates[i];
+                      return DropdownMenuItem<int>(
+                        value: i,
+                        child: Text(
+                          '${spot['name']} (${spot['distance']})',
+                          style: GoogleFonts.inter(fontSize: 12),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      );
+                    },
+                  ),
+                  onChanged: (idx) {
+                    if (idx != null) {
+                      attendance.selectStaticPointByIndex(idx);
+                      latController.text = attendance.staticLatitude;
+                      lngController.text = attendance.staticLongitude;
+                    }
+                  },
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      attendance.randomizeStaticCoordinate();
+                      latController.text = attendance.staticLatitude;
+                      lngController.text = attendance.staticLongitude;
+                    },
+                    icon: const Icon(Icons.shuffle_rounded, size: 16),
+                    label: const Text('Acak Titik (Radius 100m)'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF16A34A),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      textStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 14),
             Text('Latitude', style: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600)),
             const SizedBox(height: 6),
             TextField(
@@ -50,22 +115,31 @@ class AttendanceScreen extends StatelessWidget {
               controller: lngController,
               decoration: const InputDecoration(hintText: '112.642500'),
             ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: () {
-                latController.text = AttendanceProvider.kDefaultStaticLatitude;
-                lngController.text = AttendanceProvider.kDefaultStaticLongitude;
-              },
-              icon: const Icon(Icons.restore_rounded, size: 16),
-              label: const Text('Reset ke Kantor Pusat K3PG'),
-              style: OutlinedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                textStyle: GoogleFonts.inter(fontSize: 12, fontWeight: FontWeight.w600),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info_outline_rounded, size: 14, color: Color(0xFF16A34A)),
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      'Koordinat otomatis selalu berganti saat Absen Masuk & Pulang agar nilai lat/long tidak sama.',
+                      style: GoogleFonts.inter(fontSize: 11, color: const Color(0xFF166534)),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
         ),
-        actions: [
+      ),
+      actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: const Text('Batal'),

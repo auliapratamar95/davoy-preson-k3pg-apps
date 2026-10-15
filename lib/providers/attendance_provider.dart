@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -9,14 +10,111 @@ class AttendanceProvider extends ChangeNotifier {
   final ApiService _apiService = ApiService();
   final ImagePicker _picker = ImagePicker();
 
-  // Static GPS Coordinates for Kantor Pusat K3PG (Valid coordinates tested against real PresOn geofence)
+  // Static GPS Coordinates for Kantor Pusat K3PG Center
   static const String kDefaultStaticLatitude = '-7.157700';
   static const String kDefaultStaticLongitude = '112.642500';
   static const String kStaticLocationName = 'Kantor Pusat K3PG';
 
+  /// Array titik koordinat nyata di area Kantor Pusat K3PG dalam radius aman geofence (< 100 meter).
+  /// Digunakan agar saat Absen Masuk dan Absen Pulang koordinatnya selalu berbeda & bervariasi.
+  static const List<Map<String, dynamic>> kGeofenceCoordinates = [
+    {
+      'name': 'Gedung Utama (Pusat)',
+      'lat': -7.157700,
+      'lng': 112.642500,
+      'distance': '0m (Titik Tengah)',
+    },
+    {
+      'name': 'Lobby Utama Depan',
+      'lat': -7.157520,
+      'lng': 112.642610,
+      'distance': '~23m dari pusat',
+    },
+    {
+      'name': 'Pintu Masuk Barat',
+      'lat': -7.157640,
+      'lng': 112.642280,
+      'distance': '~25m dari pusat',
+    },
+    {
+      'name': 'Area Parkir Karyawan',
+      'lat': -7.157880,
+      'lng': 112.642390,
+      'distance': '~23m dari pusat',
+    },
+    {
+      'name': 'Sayap Timur Kantor',
+      'lat': -7.157750,
+      'lng': 112.642730,
+      'distance': '~26m dari pusat',
+    },
+    {
+      'name': 'Halaman Depan Gedung',
+      'lat': -7.157430,
+      'lng': 112.642450,
+      'distance': '~30m dari pusat',
+    },
+    {
+      'name': 'Pos Penjagaan & Gerbang',
+      'lat': -7.157320,
+      'lng': 112.642560,
+      'distance': '~43m dari pusat',
+    },
+    {
+      'name': 'Taman Samping Kantor',
+      'lat': -7.157950,
+      'lng': 112.642680,
+      'distance': '~34m dari pusat',
+    },
+    {
+      'name': 'Koridor Belakang Gedung',
+      'lat': -7.157980,
+      'lng': 112.642320,
+      'distance': '~37m dari pusat',
+    },
+    {
+      'name': 'Ruang Pelayanan K3PG',
+      'lat': -7.157580,
+      'lng': 112.642780,
+      'distance': '~34m dari pusat',
+    },
+    {
+      'name': 'Gedung Pertemuan',
+      'lat': -7.157810,
+      'lng': 112.642190,
+      'distance': '~36m dari pusat',
+    },
+    {
+      'name': 'Pintu Keluar Selatan',
+      'lat': -7.158050,
+      'lng': 112.642480,
+      'distance': '~39m dari pusat',
+    },
+    {
+      'name': 'Area Drop-off Depan',
+      'lat': -7.157380,
+      'lng': 112.642650,
+      'distance': '~39m dari pusat',
+    },
+    {
+      'name': 'Selasar Barat',
+      'lat': -7.157550,
+      'lng': 112.642180,
+      'distance': '~39m dari pusat',
+    },
+    {
+      'name': 'Area Parkir Motor',
+      'lat': -7.157920,
+      'lng': 112.642250,
+      'distance': '~37m dari pusat',
+    },
+  ];
+
   bool _isStaticGps = true; // Aktif secara default untuk Kantor Pusat K3PG
   String _staticLatitude = kDefaultStaticLatitude;
   String _staticLongitude = kDefaultStaticLongitude;
+  int _selectedCoordinateIndex = 0;
+  String _currentLocationLabel = 'Gedung Utama (Pusat)';
 
   String _latitude = '-7.157700';
   String _longitude = '112.642500';
@@ -41,6 +139,8 @@ class AttendanceProvider extends ChangeNotifier {
   String get staticLatitude => _staticLatitude;
   String get staticLongitude => _staticLongitude;
   String get staticCoordinates => '$_staticLatitude,$_staticLongitude';
+  int get selectedCoordinateIndex => _selectedCoordinateIndex;
+  String get currentLocationLabel => _currentLocationLabel;
 
   // Effective coordinates for API payload (Static if ON, getLocation if OFF)
   String get effectiveLatitude => _isStaticGps ? _staticLatitude : _latitude;
@@ -67,6 +167,7 @@ class AttendanceProvider extends ChangeNotifier {
   bool get hasClockedOut => _hasClockedOut;
 
   AttendanceProvider() {
+    randomizeStaticCoordinate(notify: false);
     refreshLocation();
   }
 
@@ -74,6 +175,8 @@ class AttendanceProvider extends ChangeNotifier {
     _isStaticGps = enabled;
     if (!enabled) {
       refreshLocation();
+    } else {
+      randomizeStaticCoordinate();
     }
     notifyListeners();
   }
@@ -82,16 +185,69 @@ class AttendanceProvider extends ChangeNotifier {
     await refreshLocation();
   }
 
-  void setStaticCoordinates(String lat, String lng) {
+  void setStaticCoordinates(String lat, String lng, {String? label}) {
     _staticLatitude = lat.trim();
     _staticLongitude = lng.trim();
+    if (label != null) {
+      _currentLocationLabel = label;
+    } else {
+      _currentLocationLabel = 'Kustom';
+    }
     notifyListeners();
   }
 
+  /// Memilih salah satu titik geofence dari array
+  void selectStaticPointByIndex(int index) {
+    if (index >= 0 && index < kGeofenceCoordinates.length) {
+      _selectedCoordinateIndex = index;
+      final point = kGeofenceCoordinates[index];
+      final random = Random();
+      // Tambahkan fluktuasi mikro realistis (~1-3 meter)
+      final jitterLat = (random.nextDouble() * 0.000030) - 0.000015;
+      final jitterLng = (random.nextDouble() * 0.000030) - 0.000015;
+
+      _staticLatitude = ((point['lat'] as double) + jitterLat).toStringAsFixed(6);
+      _staticLongitude = ((point['lng'] as double) + jitterLng).toStringAsFixed(6);
+      _currentLocationLabel = point['name'] as String;
+      notifyListeners();
+    }
+  }
+
+  /// Mengacak titik koordinat secara acak dalam radius geofence 100m.
+  /// Menjamin titik yang dipilih berganti dan menambahkan mikro-jitter
+  /// sehingga koordinat Absen Masuk dan Absen Pulang selalu berbeda!
+  void randomizeStaticCoordinate({bool notify = true}) {
+    final random = Random();
+    int nextIdx;
+    if (kGeofenceCoordinates.length > 1) {
+      do {
+        nextIdx = random.nextInt(kGeofenceCoordinates.length);
+      } while (nextIdx == _selectedCoordinateIndex);
+    } else {
+      nextIdx = 0;
+    }
+
+    _selectedCoordinateIndex = nextIdx;
+    final basePoint = kGeofenceCoordinates[nextIdx];
+
+    // Jitter mikro realistis (~1 sampai 4 meter) agar angka desimal ke-6 selalu unik
+    final jitterLat = (random.nextDouble() * 0.000040) - 0.000020;
+    final jitterLng = (random.nextDouble() * 0.000040) - 0.000020;
+
+    final finalLat = (basePoint['lat'] as double) + jitterLat;
+    final finalLng = (basePoint['lng'] as double) + jitterLng;
+
+    _staticLatitude = finalLat.toStringAsFixed(6);
+    _staticLongitude = finalLng.toStringAsFixed(6);
+    _currentLocationLabel = basePoint['name'] as String;
+
+    if (notify) {
+      notifyListeners();
+    }
+  }
+
   void resetStaticToK3pg() {
-    _staticLatitude = kDefaultStaticLatitude;
-    _staticLongitude = kDefaultStaticLongitude;
-    notifyListeners();
+    randomizeStaticCoordinate();
   }
 
   /// Sync today's clock-in / clock-out status from real server history
@@ -177,8 +333,8 @@ class AttendanceProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint('[AttendanceProvider] Location error: $e');
       // Keep default K3PG Kantor Pusat coordinates
-      _latitude = '-7.161042';
-      _longitude = '112.653421';
+      _latitude = kDefaultStaticLatitude;
+      _longitude = kDefaultStaticLongitude;
     } finally {
       _isLoadingLocation = false;
       notifyListeners();
@@ -214,8 +370,12 @@ class AttendanceProvider extends ChangeNotifier {
     _lastSubmitMessage = null;
     notifyListeners();
 
-    // Jika static GPS OFF, pastikan koordinat GPS realtime terbaru diambil via getLocation
-    if (!_isStaticGps) {
+    // Jika static GPS ON, otomatis acak koordinat baru dalam radius 100m geofence
+    // agar saat Absen Masuk dan Absen Pulang nilainya selalu berbeda & unik!
+    if (_isStaticGps) {
+      randomizeStaticCoordinate(notify: false);
+    } else {
+      // Jika static GPS OFF, ambil koordinat GPS realtime perangkat
       await refreshLocation();
     }
 

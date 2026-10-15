@@ -142,7 +142,7 @@ class GpsSwitchCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     isStatic
-                        ? 'ON: Menggunakan static K3PG (${attendance.staticCoordinates})'
+                        ? 'ON: ${attendance.currentLocationLabel} (${attendance.staticCoordinates})'
                         : 'OFF: Menggunakan hasil getLocation (${attendance.coordinates})',
                     style: GoogleFonts.inter(
                       fontSize: 11,
@@ -152,7 +152,30 @@ class GpsSwitchCard extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                if (!isStatic)
+                if (isStatic)
+                  InkWell(
+                    onTap: attendance.randomizeStaticCoordinate,
+                    borderRadius: BorderRadius.circular(12),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.shuffle_rounded, size: 14, color: Color(0xFF16A34A)),
+                          const SizedBox(width: 3),
+                          Text(
+                            'Acak',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF15803D),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
                   InkWell(
                     onTap: attendance.isLoadingLocation ? null : attendance.refreshLocation,
                     child: attendance.isLoadingLocation
@@ -382,19 +405,22 @@ class GpsSwitchCard extends StatelessWidget {
                         children: [
                           const Icon(Icons.business_rounded, size: 15, color: Color(0xFF16A34A)),
                           const SizedBox(width: 6),
-                          Text(
-                            AttendanceProvider.kStaticLocationName,
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
+                          Expanded(
+                            child: Text(
+                              '${AttendanceProvider.kStaticLocationName} — ${attendance.currentLocationLabel}',
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: const Color(0xFF0F172A),
+                              ),
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Koordinat: ${attendance.staticCoordinates}',
+                        'Koordinat: ${attendance.staticCoordinates} (Geofence <100m)',
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
@@ -421,17 +447,27 @@ class GpsSwitchCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (onSettingsTap != null)
-                  IconButton(
-                    icon: const Icon(Icons.tune_rounded, size: 20, color: AppTheme.primary),
-                    onPressed: onSettingsTap,
-                    tooltip: 'Atur Koordinat Static',
-                  ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.shuffle_rounded, size: 20, color: Color(0xFF16A34A)),
+                      onPressed: attendance.randomizeStaticCoordinate,
+                      tooltip: 'Acak Koordinat Baru (100m Geofence)',
+                    ),
+                    if (onSettingsTap != null)
+                      IconButton(
+                        icon: const Icon(Icons.tune_rounded, size: 20, color: AppTheme.primary),
+                        onPressed: onSettingsTap,
+                        tooltip: 'Pilih Titik Spot',
+                      ),
+                  ],
+                ),
               ],
             ),
             const SizedBox(height: 10),
             BadgeChip.success(
-              'STATUS: ON — Absen Masuk & Pulang menggunakan koordinat Static',
+              'STATUS: ON — Koordinat otomatis diacak dalam geofence 100m',
               icon: Icons.check_circle_rounded,
             ),
           ] else ...[
