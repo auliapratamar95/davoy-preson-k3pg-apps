@@ -75,12 +75,15 @@ class BadgeChip extends StatelessWidget {
             Icon(icon, size: 12, color: textColor),
             const SizedBox(width: 4),
           ],
-          Text(
-            label,
-            style: GoogleFonts.inter(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: textColor,
+          Flexible(
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: textColor,
+              ),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

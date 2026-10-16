@@ -3,7 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../config/theme.dart';
 import '../providers/attendance_provider.dart';
-import 'badge_chip.dart';
 
 class GpsSwitchCard extends StatelessWidget {
   final bool compact;
@@ -34,12 +33,12 @@ class GpsSwitchCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isStatic ? AppTheme.primary.withAlpha(100) : const Color(0xFFCBD5E1),
-          width: isStatic ? 1.5 : 1.0,
+          color: isStatic ? const Color(0xFF16A34A).withAlpha(80) : const Color(0xFFCBD5E1),
+          width: 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: isStatic ? AppTheme.primary.withAlpha(15) : Colors.black.withAlpha(6),
+            color: isStatic ? const Color(0xFF16A34A).withAlpha(15) : Colors.black.withAlpha(6),
             blurRadius: 10,
             offset: const Offset(0, 3),
           ),
@@ -49,75 +48,52 @@ class GpsSwitchCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(7),
-                    decoration: BoxDecoration(
-                      color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Icon(
-                      isStatic ? Icons.location_pin : Icons.my_location_rounded,
-                      color: isStatic ? const Color(0xFF16A34A) : const Color(0xFF64748B),
-                      size: 18,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Static GPS',
-                        style: GoogleFonts.outfit(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      Text(
-                        isStatic ? 'Payload Kunci K3PG' : 'Sensor GPS Realtime',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(7),
+                decoration: BoxDecoration(
+                  color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  isStatic ? Icons.location_pin : Icons.my_location_rounded,
+                  color: isStatic ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+                  size: 18,
+                ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Switch ON / OFF Pill
-                  GestureDetector(
-                    onTap: () => attendance.toggleStaticGps(!isStatic),
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isStatic ? const Color(0xFF16A34A) : const Color(0xFFE2E8F0),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        isStatic ? 'ON' : 'OFF',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w800,
-                          color: isStatic ? Colors.white : const Color(0xFF475569),
-                        ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Static GPS',
+                      style: GoogleFonts.outfit(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF0F172A),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 4),
-                  Switch.adaptive(
-                    value: isStatic,
-                    activeTrackColor: const Color(0xFF16A34A),
-                    onChanged: (val) => attendance.toggleStaticGps(val),
-                  ),
-                ],
+                    Text(
+                      isStatic ? 'Payload Kunci K3PG' : 'Sensor GPS Realtime',
+                      style: GoogleFonts.inter(
+                        fontSize: 11,
+                        color: const Color(0xFF64748B),
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              // Clean toggle switch without duplicate pill
+              Transform.scale(
+                scale: 0.85,
+                child: Switch.adaptive(
+                  value: isStatic,
+                  activeTrackColor: const Color(0xFF16A34A),
+                  onChanged: (val) => attendance.toggleStaticGps(val),
+                ),
               ),
             ],
           ),
@@ -143,7 +119,7 @@ class GpsSwitchCard extends StatelessWidget {
                   child: Text(
                     isStatic
                         ? 'ON: ${attendance.currentLocationLabel} (${attendance.staticCoordinates})'
-                        : 'OFF: Menggunakan hasil getLocation (${attendance.coordinates})',
+                        : 'OFF: GPS Perangkat (${attendance.coordinates})',
                     style: GoogleFonts.inter(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
@@ -203,12 +179,12 @@ class GpsSwitchCard extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isStatic ? AppTheme.primary.withAlpha(120) : const Color(0xFFCBD5E1),
-          width: isStatic ? 1.5 : 1.0,
+          color: isStatic ? const Color(0xFF16A34A).withAlpha(80) : const Color(0xFFCBD5E1),
+          width: 1.5,
         ),
         boxShadow: [
           BoxShadow(
-            color: isStatic ? AppTheme.primary.withAlpha(15) : Colors.black.withAlpha(8),
+            color: isStatic ? const Color(0xFF16A34A).withAlpha(15) : Colors.black.withAlpha(6),
             blurRadius: 14,
             offset: const Offset(0, 4),
           ),
@@ -217,105 +193,102 @@ class GpsSwitchCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Row with Switch
+          // Header Row (Clean, overlapping switch removed)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Icon(
-                      isStatic ? Icons.location_pin : Icons.my_location_rounded,
-                      color: isStatic ? const Color(0xFF16A34A) : const Color(0xFF64748B),
-                      size: 22,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Fitur Static GPS',
-                        style: GoogleFonts.outfit(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w700,
-                          color: const Color(0xFF0F172A),
-                        ),
-                      ),
-                      Text(
-                        'Payload Absen Masuk & Pulang',
-                        style: GoogleFonts.inter(
-                          fontSize: 11,
-                          color: const Color(0xFF64748B),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(
+                  isStatic ? Icons.location_on_rounded : Icons.sensors_rounded,
+                  color: isStatic ? const Color(0xFF16A34A) : const Color(0xFF64748B),
+                  size: 22,
+                ),
               ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Animated ON / OFF Pill Badge
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
-                        color: isStatic ? const Color(0xFF86EFAC) : const Color(0xFFCBD5E1),
-                      ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Flexible(
+                          child: Text(
+                            'Mode Lokasi GPS',
+                            style: GoogleFonts.outfit(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w700,
+                              color: const Color(0xFF0F172A),
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: isStatic ? const Color(0xFFDCFCE7) : const Color(0xFFF1F5F9),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isStatic ? const Color(0xFF86EFAC) : const Color(0xFFCBD5E1),
+                            ),
+                          ),
+                          child: Text(
+                            isStatic ? 'Static Aktif' : 'GPS Sensor',
+                            style: GoogleFonts.inter(
+                              fontSize: 10,
+                              fontWeight: FontWeight.w700,
+                              color: isStatic ? const Color(0xFF15803D) : const Color(0xFF64748B),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    child: Text(
-                      isStatic ? 'ON' : 'OFF',
+                    const SizedBox(height: 2),
+                    Text(
+                      'Pilih sumber koordinat yang dikirim saat presensi',
                       style: GoogleFonts.inter(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w800,
-                        color: isStatic ? const Color(0xFF15803D) : const Color(0xFF64748B),
+                        fontSize: 11,
+                        color: const Color(0xFF64748B),
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch.adaptive(
-                    value: isStatic,
-                    activeTrackColor: const Color(0xFF16A34A),
-                    onChanged: (val) => attendance.toggleStaticGps(val),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ],
           ),
 
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
 
-          // Dual Segmented Selector Buttons: [ ON: Static K3PG ] | [ OFF: getLocation GPS ]
+          // Dual Segmented Selector Tab (Primary toggle)
           Container(
             padding: const EdgeInsets.all(4),
             decoration: BoxDecoration(
               color: const Color(0xFFF1F5F9),
-              borderRadius: BorderRadius.circular(14),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Row(
               children: [
+                // TAB 1: ON (Static K3PG)
                 Expanded(
                   child: InkWell(
                     onTap: () => attendance.toggleStaticGps(true),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: BoxDecoration(
                         color: isStatic ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
+                        borderRadius: BorderRadius.circular(12),
                         boxShadow: isStatic
                             ? [
                                 BoxShadow(
-                                  color: Colors.black.withAlpha(15),
-                                  blurRadius: 4,
+                                  color: Colors.black.withAlpha(12),
+                                  blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
                               ]
@@ -325,244 +298,305 @@ class GpsSwitchCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
-                            Icons.check_circle_rounded,
-                            size: 15,
+                            isStatic ? Icons.check_circle_rounded : Icons.radio_button_unchecked_rounded,
+                            size: 16,
                             color: isStatic ? const Color(0xFF16A34A) : const Color(0xFF94A3B8),
                           ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'ON (Static K3PG)',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: isStatic ? const Color(0xFF0F172A) : const Color(0xFF64748B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                Expanded(
-                  child: InkWell(
-                    onTap: () => attendance.toggleStaticGps(false),
-                    borderRadius: BorderRadius.circular(10),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
-                      decoration: BoxDecoration(
-                        color: !isStatic ? Colors.white : Colors.transparent,
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: !isStatic
-                            ? [
-                                BoxShadow(
-                                  color: Colors.black.withAlpha(15),
-                                  blurRadius: 4,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ]
-                            : null,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(
-                            Icons.sensors_rounded,
-                            size: 15,
-                            color: !isStatic ? AppTheme.accent : const Color(0xFF94A3B8),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'OFF (getLocation)',
-                            style: GoogleFonts.inter(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                              color: !isStatic ? const Color(0xFF0F172A) : const Color(0xFF64748B),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          const Divider(height: 24, color: Color(0xFFE2E8F0)),
-
-          // Body Description & Details based on Switch State
-          if (isStatic) ...[
-            // ==================== MODE: ON (STATIC) ====================
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.business_rounded, size: 15, color: Color(0xFF16A34A)),
-                          const SizedBox(width: 6),
-                          Expanded(
+                          const SizedBox(width: 7),
+                          Flexible(
                             child: Text(
-                              '${AttendanceProvider.kStaticLocationName} — ${attendance.currentLocationLabel}',
+                              'ON (Static K3PG)',
                               style: GoogleFonts.inter(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: const Color(0xFF0F172A),
+                                fontSize: 12,
+                                fontWeight: isStatic ? FontWeight.w700 : FontWeight.w600,
+                                color: isStatic ? const Color(0xFF0F172A) : const Color(0xFF64748B),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Koordinat: ${attendance.staticCoordinates} (Geofence <100m)',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF334155),
+                    ),
+                  ),
+                ),
+                // TAB 2: OFF (Sensor GPS)
+                Expanded(
+                  child: InkWell(
+                    onTap: () => attendance.toggleStaticGps(false),
+                    borderRadius: BorderRadius.circular(12),
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: BoxDecoration(
+                        color: !isStatic ? Colors.white : Colors.transparent,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: !isStatic
+                            ? [
+                                BoxShadow(
+                                  color: Colors.black.withAlpha(12),
+                                  blurRadius: 6,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ]
+                            : null,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            !isStatic ? Icons.sensors_rounded : Icons.radio_button_unchecked_rounded,
+                            size: 16,
+                            color: !isStatic ? AppTheme.accent : const Color(0xFF94A3B8),
+                          ),
+                          const SizedBox(width: 7),
+                          Flexible(
+                            child: Text(
+                              'OFF (GPS Sensor)',
+                              style: GoogleFonts.inter(
+                                fontSize: 12,
+                                fontWeight: !isStatic ? FontWeight.w700 : FontWeight.w600,
+                                color: !isStatic ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 14),
+
+          // Detail Section based on active mode
+          if (isStatic) ...[
+            // Mode ON: Static GPS
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0FDF4),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFBBF7D0)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      const Icon(Icons.business_rounded, size: 16, color: Color(0xFF16A34A)),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          '${AttendanceProvider.kStaticLocationName} — ${attendance.currentLocationLabel}',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF0FDF4),
+                      if (onSettingsTap != null) ...[
+                        const SizedBox(width: 6),
+                        InkWell(
+                          onTap: onSettingsTap,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFBBF7D0)),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: const Color(0xFF86EFAC)),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.tune_rounded, size: 13, color: Color(0xFF16A34A)),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Pilih Spot',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    color: const Color(0xFF15803D),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
+                      ],
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
                         child: Text(
-                          'Payload URL: &latitude=${attendance.staticCoordinates}',
+                          'Koordinat: ${attendance.staticCoordinates}',
                           style: GoogleFonts.sourceCodePro(
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                             color: const Color(0xFF15803D),
                           ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: attendance.randomizeStaticCoordinate,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFDCFCE7),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFF86EFAC)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.shuffle_rounded, size: 13, color: Color(0xFF15803D)),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Acak',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: const Color(0xFF15803D),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.shuffle_rounded, size: 20, color: Color(0xFF16A34A)),
-                      onPressed: attendance.randomizeStaticCoordinate,
-                      tooltip: 'Acak Koordinat Baru (100m Geofence)',
-                    ),
-                    if (onSettingsTap != null)
-                      IconButton(
-                        icon: const Icon(Icons.tune_rounded, size: 20, color: AppTheme.primary),
-                        onPressed: onSettingsTap,
-                        tooltip: 'Pilih Titik Spot',
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.verified_rounded, size: 13, color: Color(0xFF16A34A)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Geofence <100m • Otomatis diacak saat masuk & pulang',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF166534),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       ),
-                  ],
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            BadgeChip.success(
-              'STATUS: ON — Koordinat otomatis diacak dalam geofence 100m',
-              icon: Icons.check_circle_rounded,
+                    ],
+                  ),
+                ],
+              ),
             ),
           ] else ...[
-            // ==================== MODE: OFF (GETLOCATION) ====================
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+            // Mode OFF: GPS Sensor Realtime
+            Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF8FAFC),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: const Color(0xFFCBD5E1)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
                     children: [
-                      Row(
-                        children: [
-                          const Icon(Icons.sensors_rounded, size: 15, color: AppTheme.accent),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Hasil getLocation (Sensor Perangkat)',
-                            style: GoogleFonts.inter(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w700,
-                              color: const Color(0xFF0F172A),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Koordinat: ${attendance.coordinates}',
-                        style: GoogleFonts.inter(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: const Color(0xFF334155),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF8FAFC),
-                          borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: const Color(0xFFCBD5E1)),
-                        ),
+                      const Icon(Icons.sensors_rounded, size: 16, color: AppTheme.accent),
+                      const SizedBox(width: 8),
+                      Expanded(
                         child: Text(
-                          'Payload URL: &latitude=${attendance.coordinates}',
-                          style: GoogleFonts.sourceCodePro(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            color: const Color(0xFF334155),
+                          'Sensor GPS Perangkat',
+                          style: GoogleFonts.inter(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: const Color(0xFF0F172A),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      InkWell(
+                        onTap: attendance.isLoadingLocation ? null : attendance.refreshLocation,
+                        borderRadius: BorderRadius.circular(8),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: const Color(0xFFCBD5E1)),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              attendance.isLoadingLocation
+                                  ? const SizedBox(
+                                      width: 12,
+                                      height: 12,
+                                      child: CircularProgressIndicator(strokeWidth: 1.5),
+                                    )
+                                  : const Icon(Icons.refresh_rounded, size: 13, color: AppTheme.accent),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Ambil Ulang',
+                                style: GoogleFonts.inter(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.w700,
+                                  color: AppTheme.accent,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
                     ],
                   ),
-                ),
-                IconButton(
-                  icon: attendance.isLoadingLocation
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.refresh_rounded, color: AppTheme.accent),
-                  onPressed: attendance.isLoadingLocation ? null : attendance.refreshLocation,
-                  tooltip: 'Ambil Ulang Lokasi Realtime (getLocation)',
-                ),
-              ],
-            ),
-            if (attendance.locationError != null) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFFEF2F2),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFFECACA)),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.warning_amber_rounded, size: 14, color: AppTheme.danger),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        attendance.locationError!,
-                        style: GoogleFonts.inter(fontSize: 11, color: AppTheme.danger),
-                      ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Koordinat: ${attendance.coordinates}',
+                    style: GoogleFonts.sourceCodePro(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF334155),
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  if (attendance.locationError != null) ...[
+                    const SizedBox(height: 6),
+                    Text(
+                      attendance.locationError!,
+                      style: GoogleFonts.inter(fontSize: 11, color: AppTheme.danger),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
-                ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.info_outline_rounded, size: 13, color: Color(0xFF64748B)),
+                      const SizedBox(width: 6),
+                      Expanded(
+                        child: Text(
+                          'Presensi akan mengirim koordinat asli yang dideteksi perangkat',
+                          style: GoogleFonts.inter(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF64748B),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
-            ],
-            const SizedBox(height: 10),
-            BadgeChip.info(
-              'STATUS: OFF — Absen Masuk & Pulang menggunakan hasil getLocation',
-              icon: Icons.my_location_rounded,
             ),
           ],
         ],
